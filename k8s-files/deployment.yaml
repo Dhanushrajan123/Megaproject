@@ -20,7 +20,7 @@ spec:
     spec:
       containers:
         - name: gocart
-          image: krushjagdale1/gocart-krushna:4
+          image: 732231074792.dkr.ecr.ap-south-1.amazonaws.com/mega_project01:11
           imagePullPolicy: Always
 
           ports:
