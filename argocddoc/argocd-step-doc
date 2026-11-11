@@ -1,7 +1,6 @@
 git remote remove origin
 git remote -v
-git remote add origin https://github.com/krushjagdale1/YOUR-REPO-NAME.git
-
+git remote add origin https://github.com/Dhanushrajan123/Megaproject.git
 
 
 
