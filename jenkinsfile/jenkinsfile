@@ -49,7 +49,7 @@ pipeline {
         stage('Update GitOps Manifest') {
             steps {
                 withCredentials([gitUsernamePassword(
-                    credentialsId: 'jkhdd',
+                    credentialsId: 'github-creds',
                     gitToolName: 'Default'
                 )]) {
                     sh '''
