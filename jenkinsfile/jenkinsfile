@@ -46,31 +46,34 @@ pipeline {
             }
         }
 
-        stage('Update GitOps Manifest') {
-            steps {
-                withCredentials([gitUsernamePassword(
-                    credentialsId: 'github-creds',
-                    gitToolName: 'Default'
-                )]) {
-                    sh '''
-                        # Manifest update will be finalized after
-                        # verifying the current deployment.yaml.
+stage('Update GitOps Manifest') {
+    steps {
+        withCredentials([gitUsernamePassword(
+            credentialsId: 'github-creds',
+            gitToolName: 'Default'
+        )]) {
+            sh '''
+                sed -i "s|image: krushjagdale1/gocart-krushna:.*|image: ${DOCKER_IMAGE}:${IMAGE_TAG}|" k8s-files/deployment.yaml
 
-                        git config user.name "Jenkins"
-                        git config user.email "jenkins@localhost"
+                echo "Updated deployment image:"
+                grep "image:" k8s-files/deployment.yaml
 
-                        git add k8s-files/deployment.yaml
+                git config user.name "Jenkins"
+                git config user.email "jenkins@localhost"
 
-                        if ! git diff --cached --quiet; then
-                            git commit -m "Update GoCart image to ${IMAGE_TAG} [skip ci]"
-                            git push origin HEAD:dhanush
-                        fi
-                    '''
-                }
-            }
+                git add k8s-files/deployment.yaml
+
+                if ! git diff --cached --quiet; then
+                    git commit -m "Update GoCart image to ${IMAGE_TAG} [skip ci]"
+                    git push origin HEAD:dhanush
+                fi
+            '''
         }
     }
+}
 
+        
+                       
     post {
         success {
             echo 'GoCart image pushed to ECR successfully!'
