@@ -3,11 +3,15 @@ pipeline {
     agent any
 
     environment {
-        DOCKER_IMAGE = 'gocart/gocart-dhanush'
+        AWS_REGION = 'ap-south-1'
+        AWS_ACCOUNT_ID = '732231074792'
+        ECR_REPOSITORY = 'mega_project01'
+        DOCKER_IMAGE = '732231074792.dkr.ecr.ap-south-1.amazonaws.com/mega_project01'
         IMAGE_TAG = "${BUILD_NUMBER}"
     }
 
     stages {
+
         stage('Checkout Code') {
             steps {
                 git branch: 'main',
@@ -18,23 +22,27 @@ pipeline {
 
         stage('Build Docker Image') {
             steps {
-                sh 'docker build -t ${DOCKER_IMAGE}:${IMAGE_TAG} .'
+                sh '''
+                    docker build -t ${DOCKER_IMAGE}:${IMAGE_TAG} .
+                '''
             }
         }
 
-        stage('Push Image to ecr') {
+        stage('Login to AWS ECR') {
             steps {
-                withCredentials([usernamePassword(
-                    credentialsId: 'dockerhub-creds',
-                    usernameVariable: 'DOCKER_USER',
-                    passwordVariable: 'DOCKER_PASS'
-                )]) {
-                    sh '''
-                        echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
-                        docker push ${DOCKER_IMAGE}:${IMAGE_TAG}
-                        docker logout
-                    '''
-                }
+                sh '''
+                    aws ecr get-login-password --region ${AWS_REGION} |
+                    docker login --username AWS --password-stdin \
+                    ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com
+                '''
+            }
+        }
+
+        stage('Push Image to ECR') {
+            steps {
+                sh '''
+                    docker push ${DOCKER_IMAGE}:${IMAGE_TAG}
+                '''
             }
         }
 
@@ -45,16 +53,17 @@ pipeline {
                     gitToolName: 'Default'
                 )]) {
                     sh '''
-                        sed -i "s|image: krushjagdale1/gocart-krushna:.*|image: krushjagdale1/gocart-krushna:${IMAGE_TAG}|" k8s-files/deployment.yaml
+                        # Manifest update will be finalized after
+                        # verifying the current deployment.yaml.
 
-                        git config user.name "Krushna Jagdale"
-                        git config user.email "krushjagdale1@example.com"
+                        git config user.name "Jenkins"
+                        git config user.email "jenkins@localhost"
 
                         git add k8s-files/deployment.yaml
 
                         if ! git diff --cached --quiet; then
                             git commit -m "Update GoCart image to ${IMAGE_TAG} [skip ci]"
-                            git push origin HEAD:main
+                            git push origin HEAD:dhanush
                         fi
                     '''
                 }
@@ -64,7 +73,7 @@ pipeline {
 
     post {
         success {
-            echo 'Docker image pushed and GitOps manifest updated successfully!'
+            echo 'GoCart image pushed to ECR successfully!'
         }
 
         failure {
@@ -72,8 +81,9 @@ pipeline {
         }
 
         always {
-            sh 'docker logout || true'
+            sh '''
+                docker logout ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com || true
+            '''
         }
     }
 }
-
