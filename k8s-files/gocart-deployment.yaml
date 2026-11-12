@@ -18,6 +18,11 @@ spec:
         app: gocart
 
     spec:
+      imagePullSecrets:
+        - name: ecr-registry-secret
+        - name: ecr-secret
+    
+
       containers:
         - name: gocart
           image: 732231074792.dkr.ecr.ap-south-1.amazonaws.com/mega_project01:11
@@ -49,4 +54,3 @@ spec:
               port: 3000
             initialDelaySeconds: 30
             periodSeconds: 20
-
