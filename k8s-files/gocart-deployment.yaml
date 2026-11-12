@@ -21,6 +21,7 @@ spec:
       imagePullSecrets:
         - name: ecr-registry-secret
         - name: ecr-secret
+    
 
       containers:
         - name: gocart
