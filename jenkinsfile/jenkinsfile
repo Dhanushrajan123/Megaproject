@@ -1,13 +1,12 @@
-
 pipeline {
     agent any
 
     environment {
-        AWS_REGION = 'ap-south-1'
+        AWS_REGION     = 'ap-south-1'
         AWS_ACCOUNT_ID = '732231074792'
         ECR_REPOSITORY = 'mega_project01'
-        DOCKER_IMAGE = '732231074792.dkr.ecr.ap-south-1.amazonaws.com/mega_project01'
-        IMAGE_TAG = "${BUILD_NUMBER}"
+        DOCKER_IMAGE   = '732231074792.dkr.ecr.ap-south-1.amazonaws.com/mega_project01'
+        IMAGE_TAG      = "${BUILD_NUMBER}"
     }
 
     stages {
@@ -31,7 +30,7 @@ pipeline {
         stage('Login to AWS ECR') {
             steps {
                 sh '''
-                    aws ecr get-login-password --region ${AWS_REGION} |
+                    aws ecr get-login-password --region ${AWS_REGION} | \
                     docker login --username AWS --password-stdin \
                     ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com
                 '''
@@ -53,10 +52,13 @@ pipeline {
                     gitToolName: 'Default'
                 )]) {
                     sh '''
-                        sed -i "s|image: krushjagdale1/gocart-krushna:.*|image: ${DOCKER_IMAGE}:${IMAGE_TAG}|" k8s-files/gocart-deployment.yaml
+                        sed -i "s|image: .*mega_project01:.*|image: ${DOCKER_IMAGE}:${IMAGE_TAG}|" k8s-files/gocart-deployment.yaml
 
                         echo "Updated deployment image:"
                         grep "image:" k8s-files/gocart-deployment.yaml
+
+                        # Fail loudly if the new image line is not in the file
+                        grep -q "image: ${DOCKER_IMAGE}:${IMAGE_TAG}" k8s-files/gocart-deployment.yaml
 
                         git config user.name "Jenkins"
                         git config user.email "jenkins@localhost"
@@ -65,7 +67,9 @@ pipeline {
 
                         if ! git diff --cached --quiet; then
                             git commit -m "Update GoCart image to ${IMAGE_TAG} [skip ci]"
-                            git push origin HEAD:dhanush
+                            git push origin HEAD:main
+                        else
+                            echo "No change to commit (image already ${IMAGE_TAG})"
                         fi
                     '''
                 }
@@ -76,7 +80,7 @@ pipeline {
 
     post {
         success {
-            echo 'GoCart image pushed to ECR successfully!'
+            echo 'GoCart image pushed to ECR and manifest updated successfully!'
         }
 
         failure {
