@@ -53,15 +53,15 @@ pipeline {
                     gitToolName: 'Default'
                 )]) {
                     sh '''
-                        sed -i "s|image: krushjagdale1/gocart-krushna:.*|image: ${DOCKER_IMAGE}:${IMAGE_TAG}|" k8s-files/deployment.yaml
+                        sed -i "s|image: krushjagdale1/gocart-krushna:.*|image: ${DOCKER_IMAGE}:${IMAGE_TAG}|" k8s-files/gocart-deployment.yaml
 
                         echo "Updated deployment image:"
-                        grep "image:" k8s-files/deployment.yaml
+                        grep "image:" k8s-files/gocart-deployment.yaml
 
                         git config user.name "Jenkins"
                         git config user.email "jenkins@localhost"
 
-                        git add k8s-files/deployment.yaml
+                        git add k8s-files/gocart-deployment.yaml
 
                         if ! git diff --cached --quiet; then
                             git commit -m "Update GoCart image to ${IMAGE_TAG} [skip ci]"
