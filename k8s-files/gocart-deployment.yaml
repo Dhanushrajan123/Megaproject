@@ -25,7 +25,7 @@ spec:
 
       containers:
         - name: gocart
-          image: 732231074792.dkr.ecr.ap-south-1.amazonaws.com/mega_project01:11
+          image: 732231074792.dkr.ecr.ap-south-1.amazonaws.com/mega_project01:25
           imagePullPolicy: Always
 
           ports:
