@@ -1,7 +1,7 @@
 import AdminLayout from "@/components/admin/AdminLayout";
 
 export const metadata = {
-    title: "GoCart-CI-CD. - Admin",
+    title: "GoCart. - Admin",
     description: "GoCart. - Admin",
 };
 
