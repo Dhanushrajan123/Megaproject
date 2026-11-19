@@ -48,7 +48,7 @@ pipeline {
         stage('Update GitOps Manifest') {
             steps {
                 withCredentials([gitUsernamePassword(
-                    credentialsId: 'passwd',
+                    credentialsId: 'github-creds',
                     gitToolName: 'Default'
                 )]) {
                     sh '''
