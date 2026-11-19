@@ -15,7 +15,7 @@ pipeline {
             steps {
                 git branch: 'main',
                     url: 'https://github.com/Dhanushrajan123/Megaproject.git',
-                    credentialsId: 'github-creds'
+                    credentialsId: 'passwd'
             }
         }
 
@@ -48,7 +48,7 @@ pipeline {
         stage('Update GitOps Manifest') {
             steps {
                 withCredentials([gitUsernamePassword(
-                    credentialsId: 'github-creds',
+                    credentialsId: 'passwd',
                     gitToolName: 'Default'
                 )]) {
                     sh '''
